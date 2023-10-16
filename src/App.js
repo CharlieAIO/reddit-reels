@@ -68,6 +68,24 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
+  )
+}
+
+
+function Footer() {
+  return (
+    <footer className="bg-gray-100 py-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex justify-center items-center">
+          <div className="text-gray-600 text-sm">
+            <a href="https://app.redditreels.com/tos" className="mr-4 hover:text-gray-900">Terms of Service</a>
+            <a href="https://app.redditreels.com/privacy" className="hover:text-gray-900">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }
