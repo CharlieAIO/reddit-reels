@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { BsDiscord, BsTwitter } from 'react-icons/bs'
 const AppScreenshot = require('./appScreenshot.png')
 
 export default function App() {
@@ -75,17 +75,35 @@ export default function App() {
 }
 
 
+
+
 function Footer() {
   return (
-    <footer className="bg-gray-100 py-6">
+    <footer className="bg-gray-100 py-6" >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-center items-center">
-          <div className="text-gray-600 text-sm">
-            <a href="https://app.redditreels.com/tos" className="mr-4 hover:text-gray-900">Terms of Service</a>
-            <a href="https://app.redditreels.com/privacy" className="hover:text-gray-900">Privacy Policy</a>
+        <div className="flex items-center space-x-32">
+
+          {/* Social Icons */}
+          <div className="text-gray-600 text-sm space-x-4">
+            <a target='_blank' href="https://discord.com/invite/YJa946V7TK" className="hover:text-gray-900">
+              <BsDiscord size={20} />
+            </a>
+            <a target='_blank' href="https://twitter.com/Reddit_Reels" className="hover:text-gray-900">
+              <BsTwitter size={20} />
+            </a>
           </div>
+
+          {/* Terms of Service & Privacy Policy Links */}
+          <div className="flex-grow">
+            <div className="flex justify-center text-gray-600 text-sm space-x-4">
+              <a target='_blank' href="https://app.redditreels.com/tos" className="hover:text-gray-900">Terms of Service</a>
+              <a target='_blank' href="https://app.redditreels.com/privacy" className="hover:text-gray-900">Privacy Policy</a>
+            </div>
+          </div>
+
         </div>
       </div>
-    </footer>
+    </footer >
+
   )
 }
