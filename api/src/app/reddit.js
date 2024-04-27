@@ -246,13 +246,17 @@ async function takeScreenshotComment(page, url, id, folderName) {
     }
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function createBrowser_Login(username, password) {
     var success = false
     try {
+        console.log(`logging in....`)
         // var browser = await puppeteer.launch({ headless: `new` });
         var browser = await puppeteer.launch({
-            headless: `new`,
+            headless: false,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
@@ -265,7 +269,6 @@ async function createBrowser_Login(username, password) {
             value: '{%22opted%22:true%2C%22nonessential%22:true}'
         })
 
-
         // Wait for the username input field and enter the username
         await page.waitForSelector('input[name="username"]');
         await page.type('input[name="username"]', username);
@@ -274,8 +277,41 @@ async function createBrowser_Login(username, password) {
         await page.waitForSelector('input[name="password"]');
         await page.type('input[name="password"]', password);
 
-        // Click on the login button
-        await page.click('button[type="submit"]');
+        await timeout(1500)
+
+        try {
+            const buttonClicked = await page.evaluate(() => {
+                let appElement = document.querySelector('shreddit-app > shreddit-overlay-display');
+                if (!appElement) throw new Error('App element not found');
+                let shadowRoot = appElement.shadowRoot;
+                if (!shadowRoot) throw new Error('App element shadow root not found');
+
+                let signupDrawerElement = shadowRoot.querySelector('shreddit-signup-drawer');
+                if (!signupDrawerElement) throw new Error('Signup drawer element not found');
+                shadowRoot = signupDrawerElement.shadowRoot;
+                if (!shadowRoot) throw new Error('Signup drawer element shadow root not found');
+
+                let shredditSlotterElement = shadowRoot.querySelector('shreddit-drawer > div > shreddit-async-loader > div > shreddit-slotter');
+                if (!shredditSlotterElement) throw new Error('Slotter element not found');
+                shadowRoot = shredditSlotterElement.shadowRoot;
+                if (!shadowRoot) throw new Error('Slotter element shadow root not found');
+
+                let buttonElement = shadowRoot.querySelector('button.login');
+                if (!buttonElement) throw new Error('Login button not found');
+
+                buttonElement.click();
+                return true;
+            });
+
+            if (buttonClicked) {
+                console.log('Login button clicked successfully');
+            }
+        } catch (error) {
+            console.error('An error occurred while trying to click the login button:', error);
+        }
+
+
+
         await page.waitForNavigation();
         console.log('Login Success', username);
         success = true

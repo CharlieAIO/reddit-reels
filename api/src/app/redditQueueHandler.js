@@ -38,6 +38,8 @@ const closeAllBrowsers = async () => {
     }
     browsers = [];
 }
+
+
 const setupBrowsers = async () => {
     await closeAllBrowsers();
     for (let i = 0; i < BROWSER_COUNT; i++) {
