@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-const pathToKey = path.join(__dirname, '../key.json');
+const pathToKey = path.join(__dirname, '../../key.json');
 
 const ttsClient = new TextToSpeechClient({
     keyFilename: pathToKey

@@ -2,7 +2,7 @@ const { Storage } = require('@google-cloud/storage');
 const path = require('path');
 
 
-const pathToKey = path.join(__dirname, '../../key.json');
+const pathToKey = path.join(__dirname, '../../../key.json');
 const storageClient = new Storage({
     keyFilename: pathToKey
 });

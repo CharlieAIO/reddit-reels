@@ -12,7 +12,7 @@ const { addUserFeed } = require('./db')
 const exec = require('child_process').exec;
 const { Storage } = require('@google-cloud/storage');
 
-const pathToKey = path.join(__dirname, '../../key.json');
+const pathToKey = path.join(__dirname, '../../../key.json');
 const storageClient = new Storage({
     keyFilename: pathToKey
 });

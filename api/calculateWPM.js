@@ -4,7 +4,7 @@ const path = require('path');
 const util = require('util');
 const voices = require('./voices.json');
 
-const pathToKey = path.join(__dirname, './src/key.json');
+const pathToKey = path.join(__dirname, './key.json');
 
 const ttsClient = new TextToSpeechClient({
     keyFilename: pathToKey
@@ -17,7 +17,6 @@ async function getAudioDuration(filePath) {
     const metadata = await mm.parseFile(filePath);
     return metadata.format.duration; // This will give the duration in seconds
 }
-
 
 
 

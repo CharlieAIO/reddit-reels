@@ -11,7 +11,9 @@ package-lock.json
 
 # production
 /build
-src/styles/main.css
+/app/src/assets/css/main.css
+/website/src/styles/main.css
+
 
 # misc
 .DS_Store
@@ -20,3 +22,4 @@ src/styles/main.css
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.idea
