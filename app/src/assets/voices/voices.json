@@ -1,0 +1,96 @@
+{
+    "en-US": [
+        {
+            "language": "en-US",
+            "name": "Standard-A",
+            "wpm": 156
+        },
+        {
+            "language": "en-US",
+            "name": "Standard-D",
+            "wpm": 163
+        },
+        {
+            "language": "en-US",
+            "name": "Standard-E",
+            "wpm": 156
+        },
+        {
+            "language": "en-US",
+            "name": "Standard-F",
+            "wpm": 158
+        },
+        {
+            "language": "en-US",
+            "name": "Standard-J",
+            "wpm": 165
+        },
+        {
+            "language": "en-US",
+            "name": "News-N",
+            "wpm": 186
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-G",
+            "wpm": 173
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-H",
+            "wpm": 179
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-J",
+            "wpm": 168
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-C",
+            "wpm": 161
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-D",
+            "wpm": 165
+        },
+        {
+            "language": "en-US",
+            "name": "Wavenet-F",
+            "wpm": 160
+        }
+    ],
+    "en-GB": [
+        {
+            "language": "en-GB",
+            "name": "Standard-A",
+            "wpm": 166
+        },
+        {
+            "language": "en-GB",
+            "name": "Standard-D",
+            "wpm": 147
+        },
+        {
+            "language": "en-GB",
+            "name": "Standard-F",
+            "wpm": 152
+        },
+        {
+            "language": "en-GB",
+            "name": "Wavenet-C",
+            "wpm": 150
+        },
+        {
+            "language": "en-GB",
+            "name": "Wavenet-D",
+            "wpm": 147
+        },
+        {
+            "language": "en-GB",
+            "name": "Wavenet-F",
+            "wpm": 152
+        }
+    ]
+}
