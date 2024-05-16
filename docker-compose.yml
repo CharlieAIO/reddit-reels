@@ -6,6 +6,8 @@ services:
     build: ./api
     env_file:
       - .env
+    volumes:
+      - videos_volume:/usr/src/app/videos
     networks:
         - reddit-reels-network
 
@@ -40,3 +42,4 @@ networks:
 
 volumes:
   mongo_volume:
+  videos_volume:

@@ -36,12 +36,20 @@ async function handleTemp(folderName = './temp', del = false) {
 
 const default_bg_videos = [
     {
-        filePath: "slice_it_all_default.mp4",
-        fileName: "slice_it_all_default.mp4",
+        filePath: "minecraft_parkour_1_default.mp4",
+        fileName: "minecraft_parkour_1_default.mp4",
     },
     {
-        filePath: "minecraft_default.mp4",
-        fileName: "minecraft_default.mp4",
+        filePath: "minecraft_parkour_2_default.mp4",
+        fileName: "minecraft_parkour_2_default.mp4",
+    },
+    {
+        filePath: "trackmania_default.mp4",
+        fileName: "trackmania_default.mp4",
+    },
+    {
+        filePath: "gta_1_default.mp4",
+        fileName: "gta_1_default.mp4",
     }
 ]
 const videoPreset = 'ultrafast'

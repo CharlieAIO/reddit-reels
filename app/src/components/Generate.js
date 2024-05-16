@@ -13,12 +13,20 @@ const generateOptions = [
 
 const default_bg_videos = [
     {
-        fileName: "slice_it_all_default.mp4",
-        name: "Slice it all (default)",
+        fileName: "minecraft_parkour_1_default.mp4",
+        name: "Minecraft 1 (default)",
     },
     {
-        fileName: "minecraft_default.mp4",
-        name: "Minecraft (default)",
+        fileName: "minecraft_parkour_2_default.mp4",
+        name: "Minecraft 2 (default)",
+    },
+    {
+        fileName: "trackmania_default.mp4",
+        name: "Trackmania (default)",
+    },
+    {
+        fileName: "gta_1_default.mp4",
+        name: "GTA Racing (default)",
     }
 ]
 
