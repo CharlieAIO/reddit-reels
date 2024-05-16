@@ -2,14 +2,14 @@ FROM node:latest as builder
 
 WORKDIR /app
 
-COPY ../app/package.json ../app/package-lock.json ./app/
-COPY ../website/package.json ../website/package-lock.json ./website/
+COPY ./app/package.json ./app/package-lock.json ./app/
+COPY../website/package.json ./website/package-lock.json ./website/
 
 RUN cd app && npm install
 RUN cd website && npm install
 
-COPY ../app ./app
-COPY ../website ./website
+COPY ./app ./app
+COPY ./website ./website
 
 RUN cd app && npm run build:css && npm run build
 RUN cd website && npm run build:css && npm run build

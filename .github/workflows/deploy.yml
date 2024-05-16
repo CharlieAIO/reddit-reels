@@ -23,14 +23,12 @@ jobs:
             cd reddit-reels
             git pull
             
-            
             # Stop and remove all Docker containers
             sudo docker stop $(sudo docker ps -aq)
             sudo docker rm $(sudo docker ps -aq)
             
             # Remove all Docker images
             sudo docker rmi -f $(sudo docker images -aq)
-            
             
             sudo docker-compose down
             sudo docker-compose build
