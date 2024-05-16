@@ -19,3 +19,5 @@ COPY --from=builder /app/website/build /var/www/website/build
 COPY --from=builder /app/app/build /var/www/app/build
 
 COPY ./nginx/conf /etc/nginx/conf.d
+
+CMD ["nginx", "-g", "daemon off;"]
