@@ -1,6 +1,8 @@
 const snoowrap = require('snoowrap');
 const puppeteer = require('puppeteer');
 const sharp = require('sharp');
+const { setTimeout } = require('timers/promises');
+
 const path = require('path');
 const cleanTextReplacements = require('./cleanText')
 
@@ -66,14 +68,6 @@ function cleanText(text) {
     }
 
     return words.join(" ");
-}
-
-async function wait(time) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve();
-        }, time * 1000);
-    });
 }
 
 
@@ -246,23 +240,36 @@ async function takeScreenshotComment(page, url, id, folderName) {
     }
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function createBrowser_Login(username, password) {
     var success = false
     try {
         console.log(`logging in....`)
         // var browser = await puppeteer.launch({ headless: `new` });
         var browser = await puppeteer.launch({
-            headless: false,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            executablePath: '/usr/bin/google-chrome-stable',
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            protocolTimeout:100000
         });
 
         var page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'en-US,en;q=0.9'
+        });
 
-        await page.goto('https://www.reddit.com/login/')
+        // console.log('Attempting to log in...');
+        // await page.screenshot({path: 'pre-login-screenshot.png'}); // Taking a screenshot right before attempting to log in
+
+
+        try {
+            await page.goto('https://www.reddit.com/login/');
+        } catch (e) {
+            console.log('Error during navigation:', e);
+            await page.screenshot({path: 'navigation-error.png'});
+            throw e; // Re-throw to handle or log it higher up in your call stack
+        }
+
 
         await page.setCookie({
             name: 'eu_cookie',
@@ -272,15 +279,20 @@ async function createBrowser_Login(username, password) {
         // Wait for the username input field and enter the username
         await page.waitForSelector('input[name="username"]');
         await page.type('input[name="username"]', username);
+        // await page.screenshot({path: 'username-type.png'});
+
 
         // Wait for the password input field and enter the password
         await page.waitForSelector('input[name="password"]');
         await page.type('input[name="password"]', password);
 
-        await timeout(1500)
+        // await page.screenshot({path: 'password-type.png'});
 
+
+        await setTimeout(1500)
+        let buttonClicked;
         try {
-            const buttonClicked = await page.evaluate(() => {
+            buttonClicked = await page.evaluate(() => {
                 let appElement = document.querySelector('shreddit-app > shreddit-overlay-display');
                 if (!appElement) throw new Error('App element not found');
                 let shadowRoot = appElement.shadowRoot;
@@ -303,16 +315,24 @@ async function createBrowser_Login(username, password) {
                 return true;
             });
 
-            if (buttonClicked) {
-                console.log('Login button clicked successfully');
-            }
         } catch (error) {
             console.error('An error occurred while trying to click the login button:', error);
         }
 
+        // await page.screenshot({ path: "after-button-click.png" });
+        // console.log('Screenshot taken.');
 
 
-        await page.waitForNavigation();
+        if (buttonClicked) {
+            console.log('Login button clicked');
+        } else {
+            console.log('Login button not clicked');
+            return { page, browser, loggedIn: false }
+        }
+
+        // await page.waitForNavigation({ timeout: 120000 });
+
+
         console.log('Login Success', username);
         success = true
     } catch (e) {
