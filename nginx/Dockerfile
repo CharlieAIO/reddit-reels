@@ -3,7 +3,7 @@ FROM node:latest as builder
 WORKDIR /app
 
 COPY ./app/package.json ./app/package-lock.json ./app/
-COPY../website/package.json ./website/package-lock.json ./website/
+COPY ./website/package.json ./website/package-lock.json ./website/
 
 RUN cd app && npm install
 RUN cd website && npm install
