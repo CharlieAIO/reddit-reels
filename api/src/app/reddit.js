@@ -1,7 +1,7 @@
 const snoowrap = require('snoowrap');
 const puppeteer = require('puppeteer');
 const sharp = require('sharp');
-const { setTimeout } = require('timers/promises');
+const {setTimeout} = require('timers/promises');
 
 const path = require('path');
 const cleanTextReplacements = require('./cleanText')
@@ -30,10 +30,10 @@ async function getSubreddit(subredditName, limit = 15, time = 'day', sort = 'top
         .getSubreddit(subredditName);
 
     const sortMethod = {
-        'top': () => posts.getTop({ time, limit, after }),
-        'hot': () => posts.getHot({ limit, after }),
-        'new': () => posts.getNew({ limit, after }),
-        'rising': () => posts.getRising({ limit, after }),
+        'top': () => posts.getTop({time, limit, after}),
+        'hot': () => posts.getHot({limit, after}),
+        'new': () => posts.getNew({limit, after}),
+        'rising': () => posts.getRising({limit, after}),
     };
     const sortedPosts = await sortMethod[sort]?.() || [];
 
@@ -50,7 +50,7 @@ async function getSubreddit(subredditName, limit = 15, time = 'day', sort = 'top
 
 async function getComments(postId) {
     const submission = await reddit.getSubmission(postId);
-    await submission.expandReplies({ limit: 50, depth: 1 });
+    await submission.expandReplies({limit: 50, depth: 1});
     return submission.comments.filter(e => !['moderator'].includes(e.distinguished));
 
 }
@@ -70,8 +70,6 @@ function cleanText(text) {
     return words.join(" ");
 }
 
-
-
 async function takeScreenshot(page, url, id, folderName) {
     try {
         const radius = 20;
@@ -80,51 +78,34 @@ async function takeScreenshot(page, url, id, folderName) {
             height: 840,
             deviceScaleFactor: 2
         });
-        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
+        await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: 'light'}]);
 
-        await page.goto(url, { waitUntil: 'domcontentloaded' });  // Changed from 'domcontentloaded'
+        await page.goto(url, {waitUntil: 'domcontentloaded'});
 
-        const customSelector = 'div[data-test-id="post-content"]';
-        let retries = 3; // Number of retries
+        await page.evaluate(() => {
+            let shredditPost = document.querySelector( 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post');
+            if (!shredditPost) throw new Error('shredditPost not found');
 
-        let elementHandle;
+            let shadowRoot = shredditPost.shadowRoot;
+            shadowRoot.querySelector('award-button').remove()
+            shadowRoot.querySelector('shreddit-post-share-button').remove()
+            shredditPost.querySelector('pdp-back-button').remove()
+            shredditPost.querySelector('shreddit-post-overflow-menu').remove()
+        });
 
-        // Retry mechanism
-        while (retries > 0) {
-            try {
-                await page.waitForSelector(customSelector, { timeout: 20000 });  // Increased timeout
-                elementHandle = await page.$(customSelector);
+        // Try to select the details element inside the shadowRoot
+        const postSelector = 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post';
+        await page.waitForSelector(postSelector, {timeout: 20000});
 
-                if (elementHandle) {
-                    break;
-                }
-            } catch (error) {
-                console.log(`Element not found for URL ${url}. Retrying...`);
-                retries -= 1;
-            }
-        }
-
-        if (retries === 0) {
-            throw new Error(`Element not found for URL ${url}`);
-        }
-
-        await page.evaluate((parentSelector, childSelector) => {
-            const parentElement = document.querySelector(parentSelector);
-            const childElement = parentElement.querySelector(childSelector);
-            if (childElement) childElement.remove();
-        }, customSelector, 'div[data-click-id="text"]');
-
-
-        const screenshotBuffer = await elementHandle.screenshot({ type: 'png' });
-
-        const { width, height } = await sharp(screenshotBuffer).metadata();
+        const screenshotBuffer = await page.$(postSelector).screenshot({type: 'png'});
+        const {width, height} = await sharp(screenshotBuffer).metadata();
 
         const maskBuffer = await sharp({
             create: {
                 width: width,
                 height: height,
                 channels: 4,
-                background: { r: 0, g: 0, b: 0, alpha: 0 },
+                background: {r: 0, g: 0, b: 0, alpha: 0},
             },
         }).png()
             .composite([
@@ -138,11 +119,11 @@ async function takeScreenshot(page, url, id, folderName) {
             .toBuffer();
 
         await sharp(screenshotBuffer)
-            .composite([{ input: maskBuffer, blend: 'dest-in' }])
+            .composite([{input: maskBuffer, blend: 'dest-in'}])
             .png()
             .toFile(path.join(__dirname, `${folderName}/screenshots/${id}.png`));
 
-        return true; // You can return any value or object based on your needs
+        return true;
 
     } catch (err) {
         console.error({
@@ -150,12 +131,9 @@ async function takeScreenshot(page, url, id, folderName) {
             url: url,
             id: id,
         });
-        return false; // You can return false or any other value to indicate failure
+        return false;
     }
 }
-
-
-
 
 async function takeScreenshotComment(page, url, id, folderName) {
     try {
@@ -165,77 +143,74 @@ async function takeScreenshotComment(page, url, id, folderName) {
             height: 840,
             deviceScaleFactor: 2
         });
-        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
+        await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: 'light'}]);
 
+        await page.goto(url, {waitUntil: 'domcontentloaded'});
 
+        await page.evaluate(() => {
+            let shredditComment = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            if (!shredditComment) throw new Error('shredditComment not found');
 
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
+            let shadowRoot = shredditComment.shadowRoot;
+            let detailsElement = shadowRoot.querySelector('details');
 
-        const customSelector = 'div._1ump7uMrSA43cqok14tPrG > *:first-child > *:first-child';
-        let retries = 3; // Number of retries
-        let elementHandle;
-        while (retries > 0) {
-            try {
-                await page.waitForSelector(customSelector, { timeout: 20000 });  // Increased timeout
-                elementHandle = await page.$(customSelector);
+            // Clear the page of other comments
+            document.querySelectorAll('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment')
+                .forEach(comment => {
+                    if (comment !== shredditComment) {
+                        comment.remove();
+                    }
+                });
 
-                if (elementHandle) {
-                    break;
-                }
-            } catch (error) {
-                retries -= 1;
+            // Remove unnecessary elements
+            let faceplatePartial = shadowRoot.querySelector('.faceplate-partial');
+            if (faceplatePartial) {
+                faceplatePartial.remove();
             }
+
+            let commentChildren = detailsElement.querySelector('#comment-children');
+            if (commentChildren) {
+                commentChildren.remove();
+            }
+        });
+
+        // Try to select the details element inside the shadowRoot
+        const detailsSelector = 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment';
+        await page.waitForSelector(detailsSelector, {timeout: 20000});
+        const detailsHandle = await page.evaluateHandle(() => {
+            const element = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            return element && element.shadowRoot ? element.shadowRoot.querySelector('details') : null;
+        });
+
+        if (!detailsHandle) {
+            throw new Error(`Details element not found for URL ${url}`);
         }
 
-        if (retries === 0) {
-            throw new Error(`Element not found for URL ${url}`);
-        }
-
-
-        const screenshotBuffer = await elementHandle.screenshot({ type: 'png' });
-        const { width, height } = await sharp(screenshotBuffer).metadata()
-        const maskBuffer = await sharp({
-            create: {
-                width: width,
-                height: height,
-                channels: 4,
-                background: { r: 0, g: 0, b: 0, alpha: 0 },
-            },
-        }).png()
-            .composite([
-                {
-                    input: Buffer.from(
-                        `<svg><rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" ry="${radius}" style="fill:rgb(0,0,0);"/></svg>`
-                    ),
-                    blend: 'dest-over',
-                },
-            ])
-            .toBuffer();
-
+        const screenshotBuffer = await detailsHandle.screenshot({type: 'png'});
         await sharp(screenshotBuffer)
-            .composite([{ input: maskBuffer, blend: 'dest-in' }])
             .png()
             .toFile(path.join(__dirname, `${folderName}/screenshots/${id}.png`));
 
         return true;
-
 
     } catch (err) {
         console.error({
             error: err,
             url: url,
             id: id,
-        })
+        });
         try {
             await sharp({
                 create: {
                     width: 390,
                     height: 840,
                     channels: 4,
-                    background: { r: 0, g: 0, b: 0, alpha: 0 },
+                    background: {r: 0, g: 0, b: 0, alpha: 0},
                 },
             }).png().toFile(path.join(__dirname, `${folderName}/screenshots/${id}.png`));
-        } catch { }
+        } catch (error) {
+            console.error('Fallback screenshot creation failed:', error);
+        }
         return false;
     }
 }
@@ -246,10 +221,10 @@ async function createBrowser_Login(username, password) {
         console.log(`logging in....`)
         // var browser = await puppeteer.launch({ headless: `new` });
         var browser = await puppeteer.launch({
-            executablePath: '/usr/bin/google-chrome-stable',
-            headless: true,
+            // executablePath: '/usr/bin/google-chrome-stable',
+            headless: false,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            protocolTimeout:100000
+            protocolTimeout: 100000
         });
 
         var page = await browser.newPage();
@@ -327,7 +302,7 @@ async function createBrowser_Login(username, password) {
             console.log('Login button clicked');
         } else {
             console.log('Login button not clicked');
-            return { page, browser, loggedIn: false }
+            return {page, browser, loggedIn: false}
         }
 
         // await page.waitForNavigation({ timeout: 120000 });
@@ -342,9 +317,7 @@ async function createBrowser_Login(username, password) {
     }
 
 
-
-
-    return { page, browser, loggedIn: success }
+    return {page, browser, loggedIn: success}
 
 }
 
