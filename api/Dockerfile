@@ -32,6 +32,8 @@ RUN apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 # Define environment variables
 ENV USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
 ENV PUPPETEER_SKIP_DOWNLOAD true
