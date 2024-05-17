@@ -5,6 +5,7 @@ const {setTimeout} = require('timers/promises');
 
 const path = require('path');
 const cleanTextReplacements = require('./cleanText')
+const {writeFileSync} = require("fs");
 
 
 const reddit = new snoowrap({
@@ -148,6 +149,8 @@ async function takeScreenshotComment(page, url, id, folderName) {
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
         await page.evaluate(() => {
+            // save the page html to local file
+            writeFileSync('comment.html', document.documentElement.outerHTML, 'utf-8')
             let shredditComment = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
             if (!shredditComment) throw new Error('shredditComment not found');
 
