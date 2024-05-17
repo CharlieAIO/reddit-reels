@@ -221,8 +221,8 @@ async function createBrowser_Login(username, password) {
         console.log(`logging in....`)
         // var browser = await puppeteer.launch({ headless: `new` });
         var browser = await puppeteer.launch({
-            // executablePath: '/usr/bin/google-chrome-stable',
-            headless: false,
+            executablePath: '/usr/bin/google-chrome-stable',
+            headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             protocolTimeout: 100000
         });
