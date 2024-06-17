@@ -1,7 +1,5 @@
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
-
-// const client = new MongoClient(`mongodb://127.0.0.1:27017/`, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 })
 const client = new MongoClient(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@mongo:27017/`, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 })
 async function initMongo() {
     await client.connect()

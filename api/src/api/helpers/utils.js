@@ -261,7 +261,8 @@ async function sendVerificationEmail(email, code) {
     const htmlTemplate = fs.readFileSync(path.join(__dirname, '../templates/verify_template.html'), 'utf8');
 
     // Replace the placeholder with the actual code
-    const htmlContent = htmlTemplate.replace('{{CODE}}', code);
+    let htmlContent = htmlTemplate.replace('{{CODE}}', code);
+    htmlContent = htmlContent.replace('{{BASE_URL}}', process.env.BASE_URL)
 
     const mailOptions = {
         from: process.env.EMAIL,
@@ -296,7 +297,8 @@ async function sendResetEmail(email, code) {
     const htmlTemplate = fs.readFileSync(path.join(__dirname, '../templates/reset_template.html'), 'utf8');
 
     // Replace the placeholder with the actual code
-    const htmlContent = htmlTemplate.replace('{{CODE}}', code);
+    let htmlContent = htmlTemplate.replace('{{CODE}}', code)
+    htmlContent = htmlContent.replace('{{BASE_URL}}', process.env.BASE_URL)
 
     const mailOptions = {
         from: process.env.EMAIL,
@@ -370,7 +372,7 @@ const uploadVideoToTikTok = async (accessToken, filename) => {
     try {
         // Generate a publicly accessible URL for the video in GCP
         // const videoURL = `https://storage.googleapis.com/${bucketName}/${filename}`
-        const videoURL = `https://app.redditreels.com/videos/${filename}`
+        const videoURL = `${process.env.BASE_URL}videos/${filename}`
 
         if (!videoURL) {
             console.error('Could not generate a public URL for the video.');

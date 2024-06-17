@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  api:
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "4000:4000"
+
+  mongo:
+    env_file:
+      - .env.production
+    ports: []
+
+  nginx:
+    env_file:
+      - .env.production

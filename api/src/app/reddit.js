@@ -1,7 +1,6 @@
 const snoowrap = require('snoowrap');
 const puppeteer = require('puppeteer');
 const sharp = require('sharp');
-const fs = require("fs");
 const {setTimeout} = require('timers/promises');
 
 const path = require('path');
@@ -84,7 +83,8 @@ async function takeScreenshot(page, url, id, folderName) {
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
         await page.evaluate(() => {
-            let shredditPost = document.querySelector( 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post');
+            let shredditPost = document.querySelector( 'shreddit-app > div > div > div > main> shreddit-post')
+            // let shredditPost = document.querySelector( 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post');
             if (!shredditPost) throw new Error('shredditPost not found');
 
             let shadowRoot = shredditPost.shadowRoot;
@@ -95,7 +95,7 @@ async function takeScreenshot(page, url, id, folderName) {
         });
 
         // Try to select the details element inside the shadowRoot
-        const postSelector = 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post';
+        const postSelector = 'shreddit-app > div > div >div > main > shreddit-post';
         await page.waitForSelector(postSelector, {timeout: 20000});
 
         const screenshotBuffer = await page.$(postSelector).screenshot({type: 'png'});
@@ -150,15 +150,15 @@ async function takeScreenshotComment(page, url, id, folderName) {
 
         await page.evaluate(() => {
             // save the page html to local file
-            fs.writeFileSync('comment.html', document.documentElement.outerHTML, 'utf-8')
-            let shredditComment = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            let shredditComment = document.querySelector('shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            // let shredditComment = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
             if (!shredditComment) throw new Error('shredditComment not found');
 
             let shadowRoot = shredditComment.shadowRoot;
             let detailsElement = shadowRoot.querySelector('details');
 
             // Clear the page of other comments
-            document.querySelectorAll('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment')
+            shredditComment.querySelectorAll('shreddit-comment')
                 .forEach(comment => {
                     if (comment !== shredditComment) {
                         comment.remove();
@@ -178,10 +178,10 @@ async function takeScreenshotComment(page, url, id, folderName) {
         });
 
         // Try to select the details element inside the shadowRoot
-        const detailsSelector = 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment';
-        await page.waitForSelector(detailsSelector, {timeout: 20000});
+        const commentSelector = 'shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment';
+        await page.waitForSelector(commentSelector, {timeout: 20000});
         const detailsHandle = await page.evaluateHandle(() => {
-            const element = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            const element = document.querySelector(commentSelector);
             return element && element.shadowRoot ? element.shadowRoot.querySelector('details') : null;
         });
 

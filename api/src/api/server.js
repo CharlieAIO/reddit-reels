@@ -21,7 +21,7 @@ const tiktokRefresher = require('./helpers/tiktok_refresher');
 const creditHandler = require('./helpers/credit_handler');
 
 
-const allowedOrigins = ['http://localhost:3000', 'https://app.redditreels.com', 'http://app.redditreels.com']
+const allowedOrigins = ['http://localhost:3000', 'https://app.redditreels.com', 'http://app.redditreels.com','http://localhost']
 
 const app = express();
 const server = http.createServer(app);
@@ -71,15 +71,15 @@ app.get('/verify', async (req, res) => {
     const code = req.query.code
     const verified = await mongo.verifyAccount(code)
     if (!verified) {
-        res.redirect(`https://app.redditreels.com/login?verify=failed&action=verify`)
+        res.redirect(`${process.env.BASE_URL}login?verify=failed&action=verify`)
     } else {
-        res.redirect(`https://app.redditreels.com/login?verify=success&action=verify`)
+        res.redirect(`${process.env.BASE_URL}login?verify=success&action=verify`)
     }
 })
 
 app.get('/reset/password', async (req, res) => {
     const code = req.query.code
-    res.redirect(`https://app.redditreels.com/login?code=${code}&action=reset-password`)
+    res.redirect(`${process.env.BASE_URL}login?code=${code}&action=reset-password`)
 
 })
 
@@ -100,7 +100,7 @@ app.get('/videos/:filename', async (req, res) => {
 
 
 
-const redirect_uri = 'https://app.redditreels.com/tiktok/oauth/callback'
+const redirect_uri = '${process.env.BASE_URL}tiktok/oauth/callback'
 app.get('/tiktok/oauth', (req, res) => {
     const csrfState = Math.random().toString(36).substring(2);
     res.cookie('csrfState', csrfState, { maxAge: 60000 });
@@ -121,7 +121,7 @@ app.get('/tiktok/oauth', (req, res) => {
 
 app.get('/tiktok/oauth/callback', async (req, res) => {
     const code = req.query.code
-    return res.redirect(`https://app.redditreels.com/?tiktok=${code}`)
+    return res.redirect(`${process.env.BASE_URL}?tiktok=${code}`)
 
 })
 
