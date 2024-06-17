@@ -57,12 +57,12 @@ const videoPreset = 'ultrafast'
 async function createVideo_api(type, username, subreddit, sortBy, timeFrame, bgVideo, minVideoLength = null, maxVideoLength = null, subredditType = 'Auto', manualURL = null, captions = true, num = 1, socket) {
 
     const max_comment_length = 500
-    var userAccount = await mongo.getAccount(username)
-    const font = userAccount.font || null
-    const subtitleColor = userAccount.subtitleColor ? userAccount.subtitleColor : '#FFFFFF'
-    const voice = userAccount?.voice ? userAccount.voice : { languageCode: 'en-US', name: 'en-US-Wavenet-H', wpm: 179 }
+    var userAccount = await mongo.getAccount(username) || {}
+    const font = userAccount?.font || null
+    const subtitleColor = userAccount?.subtitleColor ? userAccount?.subtitleColor : '#FFFFFF'
+    const voice = userAccount?.voice ? userAccount?.voice : { languageCode: 'en-US', name: 'en-US-Wavenet-H', wpm: 179 }
 
-    userAccount.videos = [...default_bg_videos, ...userAccount.videos || []]
+    userAccount.videos = [...default_bg_videos, ...userAccount?.videos || []]
 
 
     const WPM = voice?.wpm ? voice.wpm : 179
@@ -216,11 +216,11 @@ async function createVideo_api(type, username, subreddit, sortBy, timeFrame, bgV
                 videoLength: used[i][3],
                 timestamp: parseFloat(Date.now())
             };
-            await deductFromBalance(username);
+            // await deductFromBalance(username);
             await mongo.updateReddit_Output(username, used[i][0], newVID);
             const msg = `${type} video generated (${subreddit})`;
             await updateFeed(socket, msg, parseFloat(Date.now()), 'bg-green-500', username);
-            socket.to(username).emit('new-video', newVID);
+            socket?.to(username).emit('new-video', newVID);
         }
     }
 

@@ -31,7 +31,7 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 
 app.use(cookieParser());
@@ -124,6 +124,8 @@ app.get('/tiktok/oauth/callback', async (req, res) => {
     return res.redirect(`${process.env.BASE_URL}?tiktok=${code}`)
 
 })
+
+
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);

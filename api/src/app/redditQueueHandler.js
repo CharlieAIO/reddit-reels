@@ -11,14 +11,14 @@ const accounts = [
         username: 'Timely-Fox-4692',
         password: 'Gc696fnXav8ub2w3Lqvh'
     },
-    {
-        username: 'WearyImpact7433',
-        password: 'Gc696fnXav8ub2w3Lqvh'
-    },
-    {
-        username: 'Used_Ad2880',
-        password: 'Gc696fnXav8ub2w3Lqvh'
-    }
+    // {
+    //     username: 'WearyImpact7433',
+    //     password: 'Gc696fnXav8ub2w3Lqvh'
+    // },
+    // {
+    //     username: 'Used_Ad2880',
+    //     password: 'Gc696fnXav8ub2w3Lqvh'
+    // }
 ]
 // when adding a new account ensure:
 // adult content enabled
@@ -120,5 +120,6 @@ setupBrowsers();
 setInterval(setupBrowsers, 12 * 60 * 60 * 1000); // Every 12 hours
 
 module.exports = {
-    addToQueue
+    addToQueue,
+    getAvailableBrowser
 };

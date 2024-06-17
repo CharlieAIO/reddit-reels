@@ -82,23 +82,30 @@ async function takeScreenshot(page, url, id, folderName) {
 
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
+        const originalHtml = await page.content();
+        fs.writeFileSync(`post.html`, originalHtml, 'utf-8');
+
+
         await page.evaluate(() => {
             let shredditPost = document.querySelector( 'shreddit-app > div > div > div > main> shreddit-post')
             // let shredditPost = document.querySelector( 'shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div >div > main > shreddit-post');
             if (!shredditPost) throw new Error('shredditPost not found');
 
             let shadowRoot = shredditPost.shadowRoot;
-            shadowRoot.querySelector('award-button').remove()
-            shadowRoot.querySelector('shreddit-post-share-button').remove()
-            shredditPost.querySelector('pdp-back-button').remove()
-            shredditPost.querySelector('shreddit-post-overflow-menu').remove()
+            shadowRoot.querySelector('award-button')?.remove()
+            shadowRoot.querySelector('shreddit-post-share-button')?.remove()
+            shredditPost.querySelector('pdp-back-button')?.remove()
+            shredditPost.querySelector('shreddit-post-overflow-menu')?.remove()
         });
 
         // Try to select the details element inside the shadowRoot
         const postSelector = 'shreddit-app > div > div >div > main > shreddit-post';
         await page.waitForSelector(postSelector, {timeout: 20000});
 
-        const screenshotBuffer = await page.$(postSelector).screenshot({type: 'png'});
+        const elementHandle = await page.$(postSelector);
+        if (!elementHandle) throw new Error('Element not found for screenshot.');
+
+        const screenshotBuffer = await elementHandle.screenshot({type: 'png'});
         const {width, height} = await sharp(screenshotBuffer).metadata();
 
         const maskBuffer = await sharp({
@@ -148,6 +155,10 @@ async function takeScreenshotComment(page, url, id, folderName) {
 
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
+        const originalHtml = await page.content();
+        console.log(url)
+        fs.writeFileSync(`comment.html`, originalHtml, 'utf-8');
+
         await page.evaluate(() => {
             // save the page html to local file
             let shredditComment = document.querySelector('shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment');
@@ -161,19 +172,19 @@ async function takeScreenshotComment(page, url, id, folderName) {
             shredditComment.querySelectorAll('shreddit-comment')
                 .forEach(comment => {
                     if (comment !== shredditComment) {
-                        comment.remove();
+                        comment?.remove();
                     }
                 });
 
             // Remove unnecessary elements
             let faceplatePartial = shadowRoot.querySelector('.faceplate-partial');
             if (faceplatePartial) {
-                faceplatePartial.remove();
+                faceplatePartial?.remove();
             }
 
             let commentChildren = detailsElement.querySelector('#comment-children');
             if (commentChildren) {
-                commentChildren.remove();
+                commentChildren?.remove();
             }
         });
 

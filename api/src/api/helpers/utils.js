@@ -166,7 +166,7 @@ async function updateFeed(io, msg, datenow, bg, username) {
         id: `${datenow}-${Math.floor(Math.random() * 1000)}`
     }
     await addUserFeed(username, feedData)
-    io.to(username).emit('update-feed', {
+    io?.to(username).emit('update-feed', {
         type: 'single',
         feed: feedData
     })
