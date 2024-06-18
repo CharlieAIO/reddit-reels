@@ -84,7 +84,7 @@ async function takeScreenshot(page, url, id, folderName) {
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
         const originalHtml = await page.content();
-        fs.writeFileSync(`post.html`, originalHtml, 'utf-8');
+        // fs.writeFileSync(`post.html`, originalHtml, 'utf-8');
 
 
         await page.evaluate(() => {
@@ -146,6 +146,7 @@ async function takeScreenshot(page, url, id, folderName) {
 
 async function takeScreenshotComment(page, url, id, folderName) {
     try {
+        const commentSelector = 'shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment';
         const radius = 20;
         await page.setViewport({
             width: 390,
@@ -156,14 +157,16 @@ async function takeScreenshotComment(page, url, id, folderName) {
 
         await page.goto(url, {waitUntil: 'domcontentloaded'});
 
-        const originalHtml = await page.content();
-        console.log(url)
-        fs.writeFileSync(`comment.html`, originalHtml, 'utf-8');
+        // const originalHtml = await page.content();
+        // console.log(`comment url ${url}`)
 
-        await page.evaluate(() => {
+        await page.waitForSelector(commentSelector);
+
+        // fs.writeFileSync(`comment.html`, originalHtml, 'utf-8');
+
+        await page.evaluate((commentSelector) => {
             // save the page html to local file
-            let shredditComment = document.querySelector('shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment');
-            // let shredditComment = document.querySelector('shreddit-app > dsa-transparency-modal-provider > report-flow-provider > div > div > div > main > shreddit-comment-tree > shreddit-comment');
+            let shredditComment = document.querySelector(commentSelector);
             if (!shredditComment) throw new Error('shredditComment not found');
 
             let shadowRoot = shredditComment.shadowRoot;
@@ -187,15 +190,14 @@ async function takeScreenshotComment(page, url, id, folderName) {
             if (commentChildren) {
                 commentChildren?.remove();
             }
-        });
+        }, commentSelector); // Pass commentSelector as an argument here
 
         // Try to select the details element inside the shadowRoot
-        const commentSelector = 'shreddit-app > div > div > div > main > shreddit-comment-tree > shreddit-comment';
         await page.waitForSelector(commentSelector, {timeout: 20000});
-        const detailsHandle = await page.evaluateHandle(() => {
+        const detailsHandle = await page.evaluateHandle((commentSelector) => {
             const element = document.querySelector(commentSelector);
             return element && element.shadowRoot ? element.shadowRoot.querySelector('details') : null;
-        });
+        }, commentSelector);
 
         if (!detailsHandle) {
             throw new Error(`Details element not found for URL ${url}`);
@@ -234,9 +236,8 @@ async function createBrowser_Login(username, password) {
     var success = false
     try {
         console.log(`logging in....`)
-        // var browser = await puppeteer.launch({ headless: `new` });
         var browser = await puppeteer.launch({
-            // executablePath: '/usr/bin/google-chrome-stable',
+            executablePath: '/usr/bin/google-chrome-stable',
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             protocolTimeout: 100000
@@ -247,9 +248,6 @@ async function createBrowser_Login(username, password) {
         await page.setExtraHTTPHeaders({
             'Accept-Language': 'en-US,en;q=0.9'
         });
-
-        // console.log('Attempting to log in...');
-        // await page.screenshot({path: 'pre-login-screenshot.png'}); // Taking a screenshot right before attempting to log in
 
 
         try {
@@ -317,6 +315,14 @@ async function createBrowser_Login(username, password) {
             console.log('Login button clicked');
         } else {
             console.log('Login button not clicked');
+            return {page, browser, loggedIn: false}
+        }
+
+        await page.waitForNavigation({timeout: 120000});
+
+        // check /login in the url
+        if (page.url().includes('/login')) {
+            console.log('Login Failed', username);
             return {page, browser, loggedIn: false}
         }
 

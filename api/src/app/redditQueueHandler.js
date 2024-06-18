@@ -68,9 +68,10 @@ const releaseBrowser = (browserObj) => {
 
 const queue = async.queue(async (task) => {
     try {
-        const browserObj = getAvailableBrowser();
-        if (!browserObj) {
-            throw new Error('No available browsers')
+        let browserObj = getAvailableBrowser();
+        while (!browserObj) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            browserObj = getAvailableBrowser();
         }
         if (task.type === "screenshot") {
             await reddit.takeScreenshot(
@@ -97,10 +98,6 @@ const queue = async.queue(async (task) => {
 queue.error(async (err, task) => {
     console.error('Reddit Task experienced an error:', err);
     await updateFeed(task.socket, 'Error getting screenshot', parseFloat(Date.now()), 'bg-red-500', task.username);
-});
-
-queue.drain(() => {
-    // console.log('All reddit tasks have been processed');
 });
 
 function addToQueue(data) {

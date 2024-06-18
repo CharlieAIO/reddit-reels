@@ -11,7 +11,7 @@ async function test() {
         subreddit:'askreddit',
         sortBy: "Hot",
         timeFrame:  "N/A",
-        minLength: null,
+        minLength: 30,
         maxLength: null,
         captions: false,
         num:1,
@@ -40,7 +40,6 @@ async function test() {
         task.num,
         task.socket
     );
-    console.log(res)
 }
 
 test()

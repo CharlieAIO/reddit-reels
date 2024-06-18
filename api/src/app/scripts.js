@@ -216,7 +216,8 @@ async function createVideo_api(type, username, subreddit, sortBy, timeFrame, bgV
                 videoLength: used[i][3],
                 timestamp: parseFloat(Date.now())
             };
-            // await deductFromBalance(username);
+            await deductFromBalance(username);
+
             await mongo.updateReddit_Output(username, used[i][0], newVID);
             const msg = `${type} video generated (${subreddit})`;
             await updateFeed(socket, msg, parseFloat(Date.now()), 'bg-green-500', username);
@@ -272,6 +273,7 @@ async function createCommentsVideo(post, font, color, voice, comments, video, vi
 
         const commentLink = replacePart(`https://www.reddit.com${comments[x].permalink}`)
         const commentID = `${postID}_${comments[x].id}`
+        console.log(`Adding to queue: ${commentLink} ${commentID}`)
         // await reddit.takeScreenshotComment(page, commentLink, commentID, folderName)
         addToQueue({ type: "comment", url: commentLink, id: commentID, folder: folderName })
 
