@@ -10,7 +10,7 @@ let browsers = [];
 async function setupBrowsers() {
     for(let i = 0; i < BROWSER_COUNT; i++) {
         let b = await puppeteer.launch({
-            // executablePath: '/usr/bin/google-chrome-stable',
+            executablePath: '/usr/bin/google-chrome-stable',
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
