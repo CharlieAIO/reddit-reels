@@ -229,11 +229,6 @@ async function createVideo_api(type, username, subreddit, sortBy, timeFrame, bgV
 
 }
 
-
-
-
-
-
 async function createCommentsVideo(post, font, color, voice, comments, video, videoID, captions) {
     const folderName = `../../temp_${new Date().getTime()}`
     await handleTemp(folderName)
@@ -243,14 +238,10 @@ async function createCommentsVideo(post, font, color, voice, comments, video, vi
     const postText = post.text || post.selftext || ''
     const postURL = post.url
 
-
-
-    var ref = []
-
-    var text = postTitle + "\n\n" + postText;
-
-    addToQueue({ type: "screenshot", url: postURL, id: postID, folder: folderName })
-    // await reddit.takeScreenshot(page, postURL, postID, folderName)
+    let ref = []
+    let text = postTitle + "\n\n" + postText;
+    const postHTML = await reddit.getScreenshotHTML(post.url.split('reddit.com')[1])
+    addToQueue({ url: postURL, id: postID, folder: folderName,html:postHTML })
     const GCS_FILENAME_AUDIO_TEXT = `tiktok_sound_${postID}_${Date.now().toString().substr(-5)}_text.wav`
     await audio.synthesizeSpeech(reddit.cleanText(text.trim()), path.join(__dirname, `${folderName}/audio/${postID}.wav`), GCS_FILENAME_AUDIO_TEXT, voice?.languageCode || 'en-US', voice?.name || 'en-US-Standard-A');
 
@@ -273,9 +264,8 @@ async function createCommentsVideo(post, font, color, voice, comments, video, vi
 
         const commentLink = replacePart(`https://www.reddit.com${comments[x].permalink}`)
         const commentID = `${postID}_${comments[x].id}`
-        console.log(`Adding to queue: ${commentLink} ${commentID}`)
-        // await reddit.takeScreenshotComment(page, commentLink, commentID, folderName)
-        addToQueue({ type: "comment", url: commentLink, id: commentID, folder: folderName })
+        const commentHTML = await reddit.getScreenshotHTML(comments[x].permalink)
+        addToQueue({ url: commentLink, id: commentID, folder: folderName,html:commentHTML })
 
         const GCS_FILENAME_AUDIO_ = `tiktok_sound_${postID}_${Date.now().toString().substr(-5)}_${x}.wav`
         await audio.synthesizeSpeech(reddit.cleanText(comments[x].body.trim()), path.join(__dirname, `${folderName}/audio/${commentID}.wav`), GCS_FILENAME_AUDIO_, voice?.languageCode || 'en-US', voice?.name || 'en-US-Standard-A');
@@ -294,7 +284,6 @@ async function createCommentsVideo(post, font, color, voice, comments, video, vi
         await audio.transcribe_to_srt(folderName, GCS_FILENAME_SRT)
     }
 
-    // path.join(__dirname, `../../output/${videoID}`),
     const videoLength = await processVideo(
         path.join(__dirname, `../../videos/${video}`),
         path.join(__dirname, `${folderName}/tiktok_sound.wav`),
@@ -304,8 +293,6 @@ async function createCommentsVideo(post, font, color, voice, comments, video, vi
     return videoLength
 }
 
-
-
 async function createStoryVideo(post, font, color, voice, video, videoID, captions) {
     const folderName = `../../temp_${new Date().getTime()}`
     await handleTemp(folderName)
@@ -314,17 +301,14 @@ async function createStoryVideo(post, font, color, voice, video, videoID, captio
     const postText = post.text || post.selftext || ''
     const postURL = post.url
 
-
-
-
-    addToQueue({ type: "screenshot", url: postURL, id: postID, folder: folderName })
-    // await reddit.takeScreenshot(page, postURL, postID, folderName)
+    const postHTML = await reddit.getScreenshotHTML(post.url.split('reddit.com')[1])
+    addToQueue({ url: postURL, id: postID, folder: folderName, html:postHTML })
     const GCS_FILENAME_AUDIO_TITLE = `tiktok_sound_${postID}_${Date.now().toString().substr(-5)}_title.wav`
     await audio.synthesizeSpeech(reddit.cleanText(postTitle.trim()), path.join(__dirname, `${folderName}/audio/title.wav`), GCS_FILENAME_AUDIO_TITLE, voice?.languageCode || 'en-US', voice?.name || 'en-US-Standard-A');
     const GCS_FILENAME_AUDIO_TEXT = `tiktok_sound_${postID}_${Date.now().toString().substr(-5)}_text.wav`
     await audio.synthesizeSpeech(reddit.cleanText(postText.trim()), path.join(__dirname, `${folderName}/audio/text.wav`), GCS_FILENAME_AUDIO_TEXT, voice?.languageCode || 'en-US', voice?.name || 'en-US-Standard-A');
 
-    var ref = [
+    let ref = [
         {
             "pos": 0,
             "id": `${postID}_title`,
@@ -346,7 +330,6 @@ async function createStoryVideo(post, font, color, voice, video, videoID, captio
         await audio.transcribe_to_srt(folderName, GCS_FILENAME_SRT)
     }
 
-    // path.join(__dirname, `../../output/${videoID}`)
     const videoLength = await processVideo(
         path.join(__dirname, `../../videos/${video}`),
         path.join(__dirname, `${folderName}/tiktok_sound.wav`),

@@ -34,8 +34,6 @@ async function uploadToGCS(localFilePath, GCS_FILENAME) {
     }
 }
 
-
-
 async function fileExistsInGCS(filename) {
     try {
         const bucket = storageClient.bucket(bucketName);
@@ -64,7 +62,6 @@ async function getFileForDownload(filename) {
     return null
 }
 
-
 async function hashPassword(password) {
     const saltRounds = 10;
 
@@ -88,7 +85,6 @@ async function comparePassword(password, hashedPassword) {
 
     return match;
 }
-
 
 async function signAccessToken(username, verified = true) {
     return new Promise((resolve, reject) => {
@@ -119,8 +115,6 @@ async function verifyRefresh(token) {
     })
 }
 
-
-
 async function updateFontsFile(fontFamily, destination) {
     const fontsConfPath = path.join(__dirname, '../../fonts.conf');
     const existingContent = await fs.promises.readFile(fontsConfPath, 'utf-8');
@@ -148,15 +142,12 @@ async function updateFontsFile(fontFamily, destination) {
 
 }
 
-
-
 function formatTime(seconds) {
     seconds = parseFloat(seconds)
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
 }
-
 
 async function updateFeed(io, msg, datenow, bg, username) {
     const feedData = {
@@ -344,7 +335,6 @@ const refreshTikTokAccess = async (refresh_token) => {
     }
 };
 
-
 const authTiktokCode = async (code) => {
     const redirect_uri = 'https://app.redditreels.com/tiktok/oauth/callback'
 
@@ -366,7 +356,6 @@ const authTiktokCode = async (code) => {
         return null;
     }
 };
-
 
 const uploadVideoToTikTok = async (accessToken, filename) => {
     try {
@@ -405,7 +394,6 @@ const uploadVideoToTikTok = async (accessToken, filename) => {
         return false
     }
 };
-
 
 const newSignupEmbed = async (username, email) => {
     try {

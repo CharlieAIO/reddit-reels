@@ -1,69 +1,100 @@
 const async = require('async');
-const reddit = require('./reddit');
-const { updateFeed } = require('../api/helpers/utils')
-
-const accounts = [
-    {
-        username: 'Otherwise_Swan_20',
-        password: 'Gc696fnXav8ub2w3Lqvh'
-    },
-    {
-        username: 'Timely-Fox-4692',
-        password: 'Gc696fnXav8ub2w3Lqvh'
-    },
-    // {
-    //     username: 'WearyImpact7433',
-    //     password: 'Gc696fnXav8ub2w3Lqvh'
-    // },
-    // {
-    //     username: 'Used_Ad2880',
-    //     password: 'Gc696fnXav8ub2w3Lqvh'
-    // }
-]
-// when adding a new account ensure:
-// adult content enabled
-// safe browsing disabled
-// reduce animation enabled
+const puppeteer = require('puppeteer');
+const sharp = require('sharp');
+const {join} = require("path");
 
 
-const BROWSER_COUNT = 2
+const BROWSER_COUNT = 1
 let browsers = [];
 
-const closeAllBrowsers = async () => {
+async function setupBrowsers() {
+    for(let i = 0; i < BROWSER_COUNT; i++) {
+        let b = await puppeteer.launch({
+            // executablePath: '/usr/bin/google-chrome-stable',
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        browsers.push({
+            browser: b,
+            isBusy: false
+        });
 
-    for (const browserObj of browsers) {
-        if (browserObj?.browser) {
-            await browserObj.browser.close();
-        }
-    }
-    browsers = [];
-}
-
-
-const setupBrowsers = async () => {
-    await closeAllBrowsers();
-    for (let i = 0; i < BROWSER_COUNT; i++) {
-        const { page, browser, loggedIn } = await reddit.createBrowser_Login(accounts[i].username, accounts[i].password);
-        if (loggedIn) {
-            browsers.push({ page, browser, inUse: false });
-        } else {
-            i--; // If the login failed, retry for this browser instance
-        }
     }
 }
 
-const getAvailableBrowser = () => {
-    for (const browserObj of browsers) {
-        if (!browserObj.inUse) {
-            browserObj.inUse = true;
-            return browserObj;
-        }
-    }
-    return null; // This should not happen as the queue concurrency matches the browser count
+function getAvailableBrowser() {
+    return browsers.find(browser => !browser.isBusy);
 }
 
-const releaseBrowser = (browserObj) => {
-    browserObj.inUse = false;
+function releaseBrowser(browserObj) {
+    browserObj.isBusy = false;
+}
+
+async function htmlToPng(browser, task) {
+    const imgPath = join(__dirname, `${task.folder}/screenshots/${task.id}.png`);
+    const page = await browser.newPage();
+    await page.setViewport({ width: 390, height: 840 });
+
+    if (task.html) {
+        await page.setContent(task.html, { waitUntil: 'networkidle0' });
+    } else if (task.url) {
+        await page.goto(task.url, { waitUntil: 'networkidle0' });
+    }
+
+    try {
+        await page.evaluate(() => {
+            const embedContainer = document.getElementById('embed-container');
+            if (embedContainer) {
+                embedContainer.removeAttribute('style');
+            }
+            const blurredOverlay = document.getElementById('blurred-overlay');
+            if (blurredOverlay) {
+                blurredOverlay.parentNode.removeChild(blurredOverlay);
+            }
+        });
+
+        const contentHeight = await page.evaluate(() => document.documentElement.offsetHeight);
+        await page.setViewport({
+            width: 390,
+            height: contentHeight
+        });
+
+        const screenshotBuffer = await page.screenshot({type: 'png',fullPage: true});
+        const {width, height} = await sharp(screenshotBuffer).metadata();
+
+        await page.close();
+
+
+        const maskBuffer = await sharp({
+            create: {
+                width: width,
+                height: height,
+                channels: 4,
+                background: {r: 0, g: 0, b: 0, alpha: 0},
+            },
+        }).png()
+            .composite([
+                {
+                    input: Buffer.from(
+                        `<svg><rect x="0" y="0" width="${width}" height="${height}" rx="${20}" ry="${20}" style="fill:rgb(0,0,0);"/></svg>`
+                    ),
+                    blend: 'dest-over',
+                },
+            ])
+            .toBuffer();
+
+        await sharp(screenshotBuffer)
+            .composite([{input: maskBuffer, blend: 'dest-in'}])
+            .png()
+            .toFile(imgPath);
+    }catch (e) {
+        console.log(e)
+        return false
+    }
+
+    return true;
+
+
 }
 
 const queue = async.queue(async (task) => {
@@ -73,21 +104,7 @@ const queue = async.queue(async (task) => {
             await new Promise(resolve => setTimeout(resolve, 1000));
             browserObj = getAvailableBrowser();
         }
-        if (task.type === "screenshot") {
-            await reddit.takeScreenshot(
-                browserObj.page,
-                task.url,
-                task.id,
-                task.folder
-            );
-        } else if (task.type === "comment") {
-            await reddit.takeScreenshotComment(
-                browserObj.page,
-                task.url,
-                task.id,
-                task.folder
-            );
-        }
+        await htmlToPng(browserObj.browser, task);
         releaseBrowser(browserObj);
         return null; // Success
     } catch (err) {
@@ -95,26 +112,18 @@ const queue = async.queue(async (task) => {
     }
 }, BROWSER_COUNT);
 
-queue.error(async (err, task) => {
-    console.error('Reddit Task experienced an error:', err);
-    await updateFeed(task.socket, 'Error getting screenshot', parseFloat(Date.now()), 'bg-red-500', task.username);
-});
-
 function addToQueue(data) {
     queue.push({ ...data }, (err) => {
         if (err) {
-            // console.error('Failed to process task:', err);
             return false;
         } else {
-            // console.log('Reddit Task completed');
             return true;
         }
     });
 }
 
-// Initialize the browsers at the start
-setupBrowsers();
-setInterval(setupBrowsers, 12 * 60 * 60 * 1000); // Every 12 hours
+setupBrowsers().then(r => console.log("Browser(s) setup"))
+
 
 module.exports = {
     addToQueue,

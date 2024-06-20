@@ -37,13 +37,7 @@ function generateFilters(subtitlesFilePath, fontName = 'Lilita One', fontColor =
         + `Outline=${outlineThickness},OutlineColour=${outlineColor},`
         + `Alignment=${subtitlePosition.x},${subtitlePosition.y}`;
 
-
-
     const videoFilter = `subtitles=${subtitlesFilePath}:force_style=\'${forceStyle}\'`;
-
-
-
-
 
     return videoFilter;
 }
@@ -240,8 +234,6 @@ function overlayScreenshot(nextPath, imagePath, startTime, audioDuration, folder
     });
 }
 
-
-
 async function overlayScreenshotsWithAudio(videoPath, refs, tempPath, captions, preset = 'ultrafast') {
     return new Promise(async (resolve, reject) => {
         let nextPath = videoPath;
@@ -263,20 +255,6 @@ async function overlayScreenshotsWithAudio(videoPath, refs, tempPath, captions, 
     })
 }
 
-// function saveVideo(nextPath, outputPath) {
-//     return new Promise((resolve, reject) => {
-//         fs.rename(nextPath, outputPath, (err) => {
-//             if (err) {
-//                 reject(err, 'save video error');
-//             } else {
-//                 resolve(outputPath);
-//             }
-//         });
-//     });
-// }
-
-
-
 async function processVideo(inputVideoPath, inputAudioPath, outputPath, refs, font, color, tempPath, captions, preset = 'ultrafast') {
     const audioDuration = await getAudioDuration(inputAudioPath)
     var nextPath = await cutVideoToRandomPart(inputVideoPath, audioDuration, tempPath, preset)
@@ -286,7 +264,6 @@ async function processVideo(inputVideoPath, inputAudioPath, outputPath, refs, fo
     }
     nextPath = await overlayScreenshotsWithAudio(nextPath, refs, tempPath, captions, preset)
     nextPath = await combineVideoWithAudio(nextPath, inputAudioPath, tempPath, preset)
-    // await saveVideo(nextPath, outputPath)
     await uploadToGCS(nextPath, outputPath)
 
     return audioDuration

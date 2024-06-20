@@ -1,8 +1,10 @@
 const {createVideo_api} = require("./src/app/scripts");
 const {getAvailableBrowser} = require("./src/app/redditQueueHandler");
+const reddit = require("./src/app/reddit");
 
 async function test() {
     console.log("reddit reels test video")
+
     const task = {
         generateType: 'Comments',
         bgVideo: "gta_1_default.mp4",
@@ -17,13 +19,11 @@ async function test() {
         num:1,
         socket:null,
         username:'charlieaio'
-
     }
     while(!getAvailableBrowser()) {
         // console.log("waiting for browser")
         await new Promise(resolve => setTimeout(resolve, 1000))
     }
-    await new Promise(resolve => setTimeout(resolve, 20000))
     console.log("processing task")
     const res = await createVideo_api(
         task.generateType,
