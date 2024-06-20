@@ -100,7 +100,7 @@ app.get('/videos/:filename', async (req, res) => {
 
 
 
-const redirect_uri = '${process.env.BASE_URL}tiktok/oauth/callback'
+const redirect_uri = `${process.env.BASE_URL}tiktok/oauth/callback`
 app.get('/tiktok/oauth', (req, res) => {
     const csrfState = Math.random().toString(36).substring(2);
     res.cookie('csrfState', csrfState, { maxAge: 60000 });
